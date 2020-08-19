@@ -6,6 +6,7 @@ import Login from "./login";
 import SignUp from "./signup";
 import { AuthProvider } from "./auth";
 import PrivateRoute from "./privateRoute";
+import Database from "./database";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <PrivateRoute exact path="/" component={Home} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/signup" component={SignUp} />
+          <Route exact path="/database" component={Database} />
         </div>
       </Router>
     </AuthProvider>
