@@ -46,6 +46,7 @@ const Form = () => {
     // const data = { values }; Not needed but kept for reference
 
     dataRef.push(values);
+    alert("Thanks for submitting the form!");
   };
 
   return (
