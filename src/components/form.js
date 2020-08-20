@@ -19,8 +19,29 @@ const Form = () => {
 
   return (
     <div>
-      <input type="text" onChange={handleOnChange} value={input} />
-      <button onClick={pushData}>Add Data</button>
+      <form>
+        <div>
+          <label>Question 1</label>
+          <input
+            type="email"
+            name="email"
+            id="InputEmail1"
+            placeholder="Enter answer 1"
+            required="required"
+          />
+        </div>
+        <div>
+          <label>Question 2</label>
+          <input
+            type="text"
+            name="name"
+            id="leInputName"
+            placeholder="Enter answer 2"
+            required="required"
+          />
+        </div>
+        <button type="submit">Submit</button>
+      </form>
     </div>
   );
 };
