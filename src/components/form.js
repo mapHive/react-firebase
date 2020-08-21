@@ -1,29 +1,6 @@
 import React, { useState } from "react";
 import firebase from "../base";
 
-// const Form = () => {
-// const [input, setInput] = useState("");
-
-// const handleOnChange = (e) => {
-//   setInput(e.target.value);
-// };
-
-// const pushData = () => {
-//   const dataRef = firebase.database().ref("Data");
-//   const data = {
-//     input,
-//   };
-
-//   dataRef.push(data);
-// };
-
-// return (
-//   <div>
-//     <input type="text" onChange={handleOnChange} value={input} />
-//     <button onClick={pushData}>Add Data</button>
-//   </div>
-// );
-
 const Form = () => {
   const initialFieldValues = {
     q1: "",
@@ -58,7 +35,6 @@ const Form = () => {
           name="q1"
           id="q1"
           placeholder="Enter answer 1"
-          required="required"
           value={values.q1}
           onChange={handleOnChange}
         />
@@ -70,7 +46,6 @@ const Form = () => {
           name="q2"
           id="q2"
           placeholder="Enter answer 2"
-          required="required"
           value={values.q2}
           onChange={handleOnChange}
         />
