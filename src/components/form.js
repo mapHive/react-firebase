@@ -24,16 +24,18 @@ const Form = () => {
     e.preventDefault();
 
     // First we get the validation errors without setting state
-    const errors = validate(values);
+    // We were setting the error state immediately, then checking if there
+    // were errors on the state, which does not work
+    const submissionErrors = validate(values);
     // Figure out if there are errors
-    const errorValues = Object.values(errors);
+    const errorValues = Object.values(submissionErrors);
     const isError = (str) => !!str;
     const hasErrors = errorValues.some(isError);
 
     if (hasErrors) {
       // Set the errors on state so that ui updates, don't run the
       // form submission
-      setErrors(errors);
+      setErrors(submissionErrors);
       return;
     }
 
