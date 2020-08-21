@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import firebase from "../base";
+import { AuthContext } from "../auth";
 
 const Form = () => {
   const initialFieldValues = {
@@ -7,6 +8,7 @@ const Form = () => {
     q2: "",
   };
 
+  const currentUser = useContext(AuthContext);
   const [values, setValues] = useState(initialFieldValues);
   const [errors, setErrors] = useState(initialFieldValues);
 
@@ -20,7 +22,20 @@ const Form = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setErrors(validate(values));
+
+    // First we get the validation errors without setting state
+    const errors = validate(values);
+    // Figure out if there are errors
+    const errorValues = Object.values(errors);
+    const isError = (str) => !!str;
+    const hasErrors = errorValues.some(isError);
+
+    if (hasErrors) {
+      // Set the errors on state so that ui updates, don't run the
+      // form submission
+      setErrors(errors);
+      return;
+    }
 
     const dataRef = firebase.database().ref("Submission");
     // const data = { values }; Not needed but kept for reference
@@ -42,6 +57,7 @@ const Form = () => {
 
   return (
     <form>
+      <h1>Hello {currentUser.currentUser.email}</h1>
       <div>
         <label>Question 1</label>
         <input
