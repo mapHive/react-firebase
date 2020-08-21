@@ -8,6 +8,7 @@ const Form = () => {
   };
 
   const [values, setValues] = useState(initialFieldValues);
+  const [errors, setErrors] = useState(initialFieldValues);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -19,12 +20,25 @@ const Form = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setErrors(validate(values));
+
     const dataRef = firebase.database().ref("Submission");
     // const data = { values }; Not needed but kept for reference
 
     dataRef.push(values);
-    alert("Thanks for submitting the form!");
   };
+
+  function validate(values) {
+    let errors = {};
+    if (!values.q1) {
+      errors.q1 = "This field needs to be filled";
+    }
+    if (!values.q2) {
+      errors.q2 = "This field needs to be filled";
+    }
+
+    return errors;
+  }
 
   return (
     <form>
@@ -38,6 +52,7 @@ const Form = () => {
           value={values.q1}
           onChange={handleOnChange}
         />
+        {errors.q1 && <p>{errors.q1}</p>}
       </div>
       <div>
         <label>Question 2</label>
@@ -49,6 +64,7 @@ const Form = () => {
           value={values.q2}
           onChange={handleOnChange}
         />
+        {errors.q2 && <p>{errors.q2}</p>}
       </div>
       <button type="submit" onClick={handleSubmit}>
         Submit
