@@ -1,14 +1,13 @@
 import React from "react";
-import "./app.css";
 import Form from "./components/form";
 
-const Database = () => {
+const CovidCheckRegister = () => {
   return (
     <div>
-      <h1>Booo</h1>
+      <h1>Covid Check</h1>
       <Form />
     </div>
   );
 };
 
-export default Database;
+export default CovidCheckRegister;
