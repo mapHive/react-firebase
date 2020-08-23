@@ -2,6 +2,26 @@ import React, { useState, useContext } from "react";
 import firebase from "../base";
 import { AuthContext } from "../auth";
 
+const validate = (values) => {
+  let errors = {};
+
+  if (!values.q1) {
+    errors.q1 = "This field needs to be filled";
+  }
+  if (!values.q2) {
+    errors.q2 = "This field needs to be filled";
+  }
+
+  return errors;
+};
+
+const hasErrors = (errors) => {
+  const errorValues = Object.values(errors);
+  const isError = (str) => !!str;
+
+  return errorValues.some(isError);
+};
+
 const Form = () => {
   const initialFieldValues = {
     q1: "",
@@ -27,12 +47,8 @@ const Form = () => {
     // We were setting the error state immediately, then checking if there
     // were errors on the state, which does not work
     const submissionErrors = validate(values);
-    // Figure out if there are errors
-    const errorValues = Object.values(submissionErrors);
-    const isError = (str) => !!str;
-    const hasErrors = errorValues.some(isError);
 
-    if (hasErrors) {
+    if (hasErrors(submissionErrors)) {
       // Set the errors on state so that ui updates, don't run the
       // form submission
       setErrors(submissionErrors);
@@ -44,18 +60,6 @@ const Form = () => {
 
     dataRef.push(values);
   };
-
-  function validate(values) {
-    let errors = {};
-    if (!values.q1) {
-      errors.q1 = "This field needs to be filled";
-    }
-    if (!values.q2) {
-      errors.q2 = "This field needs to be filled";
-    }
-
-    return errors;
-  }
 
   return (
     <form>
