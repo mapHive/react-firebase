@@ -55,14 +55,15 @@ const Form = () => {
       return;
     }
 
+    setErrors({});
+
     const dataRef = firebase.database().ref("Submission");
-    // const data = { values }; Not needed but kept for reference
 
     dataRef.push(values);
   };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <h1>Hello {currentUser.currentUser.email}</h1>
       <div>
         <label>Question 1</label>
@@ -88,9 +89,7 @@ const Form = () => {
         />
         {errors.q2 && <p>{errors.q2}</p>}
       </div>
-      <button type="submit" onClick={handleSubmit}>
-        Submit
-      </button>
+      <button type="submit">Submit</button>
     </form>
   );
 };
