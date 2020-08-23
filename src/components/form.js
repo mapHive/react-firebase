@@ -23,14 +23,13 @@ const hasErrors = (errors) => {
 };
 
 const Form = () => {
-  const initialFieldValues = {
-    q1: "",
-    q2: "",
-  };
+  const initialFieldValues = { q1: "", q2: "" };
 
   const currentUser = useContext(AuthContext);
   const [values, setValues] = useState(initialFieldValues);
   const [errors, setErrors] = useState(initialFieldValues);
+
+  const user = currentUser.currentUser;
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -59,12 +58,12 @@ const Form = () => {
 
     const dataRef = firebase.database().ref("Submission");
 
-    dataRef.push(values);
+    dataRef.push({ values, user: { email: user.email, uid: user.uid } });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h1>Hello {currentUser.currentUser.email}</h1>
+      <h1>Hello {user.email}</h1>
       <div>
         <label>Question 1</label>
         <input
