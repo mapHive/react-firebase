@@ -1,9 +1,10 @@
 import React, { useState, useContext } from "react";
+import { useHistory } from "react-router";
 import firebase from "../base";
 import { AuthContext } from "../auth";
 
 const validate = (values) => {
-  let errors = {};
+  const errors = {};
 
   if (!values.q1) {
     errors.q1 = "This field needs to be filled";
@@ -25,9 +26,11 @@ const hasErrors = (errors) => {
 const Form = () => {
   const initialFieldValues = { q1: "", q2: "" };
 
+  const history = useHistory();
   const currentUser = useContext(AuthContext);
   const [values, setValues] = useState(initialFieldValues);
   const [errors, setErrors] = useState(initialFieldValues);
+  const [isLoading, setIsLoading] = useState(false);
 
   const user = currentUser.currentUser;
 
@@ -57,12 +60,26 @@ const Form = () => {
     setErrors({});
 
     const dataRef = firebase.database().ref("Submission");
+    const data = { values, user: { email: user.email, uid: user.uid } };
 
-    dataRef.push({ values, user: { email: user.email, uid: user.uid } });
+    setIsLoading(true);
+
+    dataRef.push(data, (error) => {
+      setIsLoading(false);
+
+      if (error) {
+        alert(error.toString());
+
+        return;
+      }
+
+      alert("Thank you");
+      history.push("/");
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ opacity: isLoading ? 0.2 : 1 }}>
       <h1>Hello {user.email}</h1>
       <div>
         <label>Question 1</label>
@@ -73,6 +90,7 @@ const Form = () => {
           placeholder="Enter answer 1"
           value={values.q1}
           onChange={handleOnChange}
+          disabled={isLoading}
         />
         {errors.q1 && <p>{errors.q1}</p>}
       </div>
@@ -85,10 +103,13 @@ const Form = () => {
           placeholder="Enter answer 2"
           value={values.q2}
           onChange={handleOnChange}
+          disabled={isLoading}
         />
         {errors.q2 && <p>{errors.q2}</p>}
       </div>
-      <button type="submit">Submit</button>
+      <button type="submit" disabled={isLoading}>
+        Submit
+      </button>
     </form>
   );
 };
