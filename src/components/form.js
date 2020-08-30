@@ -27,12 +27,10 @@ const Form = () => {
   const initialFieldValues = { q1: "", q2: "" };
 
   const history = useHistory();
-  const currentUser = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
   const [values, setValues] = useState(initialFieldValues);
   const [errors, setErrors] = useState(initialFieldValues);
   const [isLoading, setIsLoading] = useState(false);
-
-  const user = currentUser.currentUser;
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +58,10 @@ const Form = () => {
     setErrors({});
 
     const dataRef = firebase.database().ref("Submission");
-    const data = { values, user: { email: user.email, uid: user.uid } };
+    const data = {
+      values,
+      user: { email: currentUser.email, uid: currentUser.uid },
+    };
 
     setIsLoading(true);
 
@@ -80,7 +81,7 @@ const Form = () => {
 
   return (
     <form onSubmit={handleSubmit} style={{ opacity: isLoading ? 0.2 : 1 }}>
-      <h1>Hello {user.email}</h1>
+      <h1>Hello {currentUser.email}</h1>
       <div>
         <label>Question 1</label>
         <input
