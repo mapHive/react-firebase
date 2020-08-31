@@ -26,7 +26,7 @@ function Booking() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const bookingRef = firebase.database().ref("Booking");
-    // const bookingISO = selectedDate.toISOString();
+    // const bookingISO = selectedDate.toISOString(); This outputs an incorrect time for some reason.
     const booking = selectedDate.toString();
     const bookingInfo = {
       booking,
