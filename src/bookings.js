@@ -1,9 +1,11 @@
 import "date-fns";
-import React from "react";
+import React, { useContext } from "react";
+import { useHistory } from "react-router";
 import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
+import { AuthContext } from "./auth";
 import firebase from "./base";
-import { format, formatDistance, formatRelative, subDays } from "date-fns";
+import { format } from "date-fns";
 
 // When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 import {
@@ -12,11 +14,10 @@ import {
   KeyboardDatePicker,
 } from "@material-ui/pickers";
 
-export default function MaterialUIPickers() {
-  // The first commit of Material-UI
-  const [selectedDate, setSelectedDate] = React.useState(
-    new Date("2020T12:00:00")
-  );
+function Booking() {
+  const history = useHistory();
+  const { currentUser } = useContext(AuthContext);
+  const [selectedDate, setSelectedDate] = React.useState(new Date());
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -25,10 +26,17 @@ export default function MaterialUIPickers() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const bookingRef = firebase.database().ref("Booking");
-    const bookingFormat = format(selectedDate, "'Today is a' iiii");
-    const booking = bookingFormat;
+    // const bookingISO = selectedDate.toISOString();
+    const booking = selectedDate.toString();
+    const bookingInfo = {
+      booking,
+      user: { email: currentUser.email, uid: currentUser.uid },
+    };
 
-    bookingRef.push(booking);
+    bookingRef.push(bookingInfo);
+
+    alert("Thank you");
+    history.push("/");
   };
 
   return (
@@ -66,3 +74,5 @@ export default function MaterialUIPickers() {
     </>
   );
 }
+
+export default Booking;
