@@ -49,6 +49,7 @@ export default function MaterialUIPickers() {
             }}
           />
         </Grid>
+        <button type="submit">Book Gym</button>
       </MuiPickersUtilsProvider>
     </>
   );
