@@ -16,13 +16,13 @@ function Nav() {
         </Link>
       </h3>
       <ul className="nav-links">
-        <Link style={navStyles} to="./covid-check-register">
+        <Link style={navStyles} to="../covid-check/register">
           COVID Check
         </Link>
-        <Link style={navStyles} to="./covid-check-entries">
+        <Link style={navStyles} to="../covid-check/entries">
           COVID Check Entries
         </Link>
-        <Link style={navStyles} to="./bookings">
+        <Link style={navStyles} to="../bookings">
           Bookings
         </Link>
       </ul>

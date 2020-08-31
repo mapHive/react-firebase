@@ -6,8 +6,8 @@ const Home = () => {
   return (
     <>
       <h1>Home</h1>
-      <Link to="/covid-check/register">Covid Check Form</Link>
-      <Link to="covid-check/entries">Previous Entries</Link>
+      {/* <Link to="/covid-check/register">Covid Check Form</Link>
+      <Link to="covid-check/entries">Previous Entries</Link> */}
       <button onClick={() => app.auth().signOut()}>Sign Out</button>
     </>
   );

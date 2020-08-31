@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  /* text-align: center; */
 }
 
 body {
@@ -21,4 +21,8 @@ nav {
   justify-content: space-around;
   align-items: center;
   list-style: none;
+}
+
+.main-container {
+  margin: 0 20vw;
 }

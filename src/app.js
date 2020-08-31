@@ -8,27 +8,31 @@ import PrivateRoute from "./privateRoute";
 import Nav from "./components/nav";
 import CovidCheckRegister from "./covid-check-register";
 import CovidCheckEntries from "./covid-check-entries";
+import Bookings from "./bookings";
 import "./app.css";
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <div>
+        <div className="App">
           <Nav />
-          <PrivateRoute exact path="/" component={Home} />
-          <PrivateRoute
-            exact
-            path="/covid-check/register"
-            component={CovidCheckRegister}
-          />
-          <PrivateRoute
-            exact
-            path="/covid-check/entries"
-            component={CovidCheckEntries}
-          />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/signup" component={SignUp} />
+          <div className="main-container">
+            <PrivateRoute exact path="/" component={Home} />
+            <PrivateRoute
+              exact
+              path="/covid-check/register"
+              component={CovidCheckRegister}
+            />
+            <PrivateRoute
+              exact
+              path="/covid-check/entries"
+              component={CovidCheckEntries}
+            />
+            <PrivateRoute exact path="/bookings" component={Bookings} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/signup" component={SignUp} />
+          </div>
         </div>
       </Router>
     </AuthProvider>
