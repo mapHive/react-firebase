@@ -5,6 +5,7 @@ import Login from "./login";
 import SignUp from "./signup";
 import { AuthProvider } from "./auth";
 import PrivateRoute from "./privateRoute";
+import Nav from "./components/nav";
 import CovidCheckRegister from "./covid-check-register";
 import CovidCheckEntries from "./covid-check-entries";
 import "./app.css";
@@ -14,6 +15,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <div>
+          <Nav />
           <PrivateRoute exact path="/" component={Home} />
           <PrivateRoute
             exact
