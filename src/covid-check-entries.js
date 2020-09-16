@@ -22,9 +22,9 @@ const CovidCheckEntries = () => {
     <div>
       <h1>Hi {email}, here are your Entries</h1>
       <ul>
-        {Object.values(entries).map(({ user, values }) => (
+        {Object.entries(entries).map(([id, { user, values }]) => (
           <li
-            key={user.uid}
+            key={id}
             style={user.uid !== uid ? { color: "red", fontWeight: "bold" } : {}}
           >
             {Object.entries(values).map(([question, answer]) => (
