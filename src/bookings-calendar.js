@@ -24,6 +24,14 @@ const BookingsCalendar = ({
     [fromDate, numDays, minutesPerTimeslot]
   );
 
+  /*
+  [
+ { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, { start, end }] },
+ { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, { start, end }] },
+ { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, { start, end }] },
+  ]
+*/
+
   return (
     <div>
       <h2 className={styles.title}>
@@ -70,19 +78,17 @@ export default BookingsCalendar;
 
 const generateDatesAndTimeSlots = (fromDate, numDays, minutesPerTimeslot) => {
   const today = new Date();
-  const dateRange = Array.from({ length: numDays }, (_, i) =>
-    addDays(fromDate, i)
+
+  // Generate an array of dates that we want to render
+  const dateRange = Array.from({ length: numDays }, (val, index) =>
+    addDays(fromDate, index)
   );
 
-  return dateRange.reduce((acc, date) => {
-    acc.push({
-      date,
-      isToday: isSameDay(today, date),
-      timeslots: generateTimeslotsForDate(date, minutesPerTimeslot),
-    });
-
-    return acc;
-  }, []);
+  return dateRange.map((date) => ({
+    date,
+    isToday: isSameDay(today, date),
+    timeslots: generateTimeslotsForDate(date, minutesPerTimeslot),
+  }));
 };
 
 const MINUTES_IN_DAY = 24 * 60;
@@ -90,17 +96,15 @@ const MINUTES_IN_DAY = 24 * 60;
 const generateTimeslotsForDate = (date, minutesPerTimeslot) => {
   const dayStart = startOfDay(date);
   const now = new Date();
+  const numTimeslots = Math.floor(MINUTES_IN_DAY / minutesPerTimeslot);
 
-  return Array.from(
-    { length: Math.floor(MINUTES_IN_DAY / minutesPerTimeslot) },
-    (_, i) => {
-      const start = addMinutes(dayStart, i * minutesPerTimeslot);
-      const end = addMinutes(start, minutesPerTimeslot);
-      const isCurrent = isWithinInterval(now, { start, end });
+  return Array.from({ length: numTimeslots }, (val, index) => {
+    const start = addMinutes(dayStart, index * minutesPerTimeslot);
+    const end = addMinutes(start, minutesPerTimeslot);
+    const isCurrent = isWithinInterval(now, { start, end });
 
-      return { start, end, isCurrent };
-    }
-  );
+    return { start, end, isCurrent };
+  });
 };
 
 const getTimespanTitle = (startDate, endDate) => {
