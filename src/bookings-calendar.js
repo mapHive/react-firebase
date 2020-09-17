@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import classnames from "classnames/bind";
 import {
   format,
@@ -18,17 +18,21 @@ const BookingsCalendar = ({
   fromDate = new Date(),
   numDays = 7,
   minutesPerTimeslot = 60,
+  minTime = "0500",
+  maxTime = "2100",
 }) => {
-  const datesToRender = useMemo(
-    () => generateDatesAndTimeSlots(fromDate, numDays, minutesPerTimeslot),
-    [fromDate, numDays, minutesPerTimeslot]
+  const datesToRender = generateDatesAndTimeSlots(
+    fromDate,
+    numDays,
+    minutesPerTimeslot,
+    minTime,
+    maxTime
   );
 
   /*
   [
- { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, { start, end }] },
- { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, { start, end }] },
- { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, { start, end }] },
+    { date: Date, isToday: (t|f), timeslots: [{ start, isCurrent: (t|f), end }, ...] },
+    ...
   ]
 */
 
@@ -76,7 +80,13 @@ const BookingsCalendar = ({
 
 export default BookingsCalendar;
 
-const generateDatesAndTimeSlots = (fromDate, numDays, minutesPerTimeslot) => {
+const generateDatesAndTimeSlots = (
+  fromDate,
+  numDays,
+  minutesPerTimeslot,
+  minTime,
+  maxTime
+) => {
   const today = new Date();
 
   // Generate an array of dates that we want to render
@@ -87,17 +97,29 @@ const generateDatesAndTimeSlots = (fromDate, numDays, minutesPerTimeslot) => {
   return dateRange.map((date) => ({
     date,
     isToday: isSameDay(today, date),
-    timeslots: generateTimeslotsForDate(date, minutesPerTimeslot),
+    timeslots: generateTimeslotsForDate(
+      date,
+      minutesPerTimeslot,
+      minTime,
+      maxTime
+    ),
   }));
 };
 
 const MINUTES_IN_DAY = 24 * 60;
 
-const generateTimeslotsForDate = (date, minutesPerTimeslot) => {
+const generateTimeslotsForDate = (
+  date,
+  minutesPerTimeslot,
+  minTime,
+  maxTime
+) => {
   const dayStart = startOfDay(date);
   const now = new Date();
   const numTimeslots = Math.floor(MINUTES_IN_DAY / minutesPerTimeslot);
 
+  // Replace this is for loop if easier to understand
+  // use datefns to figure out max and min timeslots as boundaries, generate between
   return Array.from({ length: numTimeslots }, (val, index) => {
     const start = addMinutes(dayStart, index * minutesPerTimeslot);
     const end = addMinutes(start, minutesPerTimeslot);
