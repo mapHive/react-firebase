@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import classnames from "classnames/bind";
 import { format } from "date-fns";
 
@@ -71,4 +71,4 @@ const BookingsCalendar = ({
   );
 };
 
-export default BookingsCalendar;
+export default memo(BookingsCalendar);
