@@ -1,14 +1,7 @@
 import { getTimespanTitle, generateDatesAndTimeSlots } from "./lib";
 
-describe("bookings-calendar/lib", () => {
+describe("booking-calendar/lib", () => {
   describe("getTimespanTitle", () => {
-    it("properly formats same start and end date in same month", () => {
-      const start = new Date("2020-10-10");
-      const end = new Date("2020-10-10");
-
-      expect(getTimespanTitle(start, end)).toBe("October 2020");
-    });
-
     it("properly formats start and end date in same month", () => {
       const start = new Date("2020-10-05");
       const end = new Date("2020-10-10");

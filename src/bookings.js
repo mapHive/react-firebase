@@ -13,7 +13,7 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import BookingsCalendar from "./bookings-calendar";
+import BookingCalendar from "./booking-calendar";
 
 function Booking() {
   const history = useHistory();
@@ -72,7 +72,7 @@ function Booking() {
           Book Gym
         </button>
       </MuiPickersUtilsProvider>
-      <BookingsCalendar />
+      <BookingCalendar />
     </>
   );
 }

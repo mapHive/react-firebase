@@ -3,11 +3,11 @@ import classnames from "classnames/bind";
 import { format } from "date-fns";
 
 import { generateDatesAndTimeSlots, getTimespanTitle } from "./lib";
-import styles from "./bookings-calendar.module.css";
+import styles from "./booking-calendar.module.css";
 
 const cx = classnames.bind(styles);
 
-const BookingsCalendar = ({
+const BookingCalendar = ({
   fromDate = new Date(),
   numDays = 7,
   minutesPerTimeslot = 60,
@@ -71,4 +71,4 @@ const BookingsCalendar = ({
   );
 };
 
-export default memo(BookingsCalendar);
+export default memo(BookingCalendar);
