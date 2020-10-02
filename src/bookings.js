@@ -30,10 +30,10 @@ function Booking() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const bookingsRef = firebase.database().ref("Bookings");
-    // const bookingISO = selectedDate.toISOString(); This outputs an incorrect time for some reason.
     const bookingInfo = {
-      start: selectedDate.toString(),
-      end: addMinutes(selectedDate, BOOKING_MINUTES_PER_TIMESLOT).toString(),
+      // toISOString stores in UTC and should be correctable when parsing for local timezone
+      start: selectedDate.toISOString(),
+      end: addMinutes(selectedDate, BOOKING_MINUTES_PER_TIMESLOT).toISOString(),
       userId,
     };
 
