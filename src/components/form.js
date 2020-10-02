@@ -31,6 +31,7 @@ const Form = () => {
   const [values, setValues] = useState(initialFieldValues);
   const [errors, setErrors] = useState(initialFieldValues);
   const [isLoading, setIsLoading] = useState(false);
+  const userId = currentUser?.uid;
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -57,10 +58,14 @@ const Form = () => {
 
     setErrors({});
 
-    const dataRef = firebase.database().ref("Submission");
+    const dataRef = firebase
+      .database()
+      .ref("UserData")
+      .child(userId)
+      .child("Submission");
     const data = {
       values,
-      user: { email: currentUser.email, uid: currentUser.uid },
+      userId: userId,
     };
 
     setIsLoading(true);

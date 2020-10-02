@@ -13,7 +13,7 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import BookingsCalendar from "./booking-calendar/index.js";
+import BookingsCalendar from "./booking-calendar/index";
 
 function Booking() {
   const history = useHistory();
@@ -36,7 +36,7 @@ function Booking() {
     const booking = selectedDate.toString();
     const bookingInfo = {
       booking,
-      userId: { uid: currentUser.uid },
+      userId: userId,
     };
 
     bookingRef.push(bookingInfo);
