@@ -2,18 +2,20 @@ import "date-fns";
 import React, { useContext } from "react";
 import { useHistory } from "react-router";
 import Grid from "@material-ui/core/Grid";
-import DateFnsUtils from "@date-io/date-fns";
-import { AuthContext } from "./auth";
-import firebase from "./base";
-import { format } from "date-fns";
-
-// When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import BookingsCalendar from "./booking-calendar/index";
+import DateFnsUtils from "@date-io/date-fns";
+import { format, addMinutes } from "date-fns";
+
+import firebase from "./base";
+import { AuthContext } from "./auth";
+import { BOOKING_MINUTES_PER_TIMESLOT } from "./constants";
+import BookingCalendar from "./booking-calendar/index";
+
+// When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 
 function Booking() {
   const history = useHistory();
@@ -27,15 +29,15 @@ function Booking() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const bookingRef = firebase.database().child("Booking");
+    const bookingsRef = firebase.database().child("Bookings");
     // const bookingISO = selectedDate.toISOString(); This outputs an incorrect time for some reason.
-    const booking = selectedDate.toString();
     const bookingInfo = {
-      booking,
-      userId: userId,
+      start: selectedDate.toString(),
+      end: addMinutes(selectedDate, BOOKING_MINUTES_PER_TIMESLOT).toString(),
+      userId,
     };
 
-    bookingRef.push(bookingInfo);
+    bookingsRef.push(bookingInfo);
 
     alert("Thank you");
     history.push("/");
@@ -73,7 +75,7 @@ function Booking() {
           Book Gym
         </button>
       </MuiPickersUtilsProvider>
-      <BookingsCalendar />
+      <BookingCalendar />
     </>
   );
 }
