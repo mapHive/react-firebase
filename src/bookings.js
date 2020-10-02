@@ -8,7 +8,7 @@ import {
   KeyboardDatePicker,
 } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
-import { format, addMinutes } from "date-fns";
+import { addMinutes } from "date-fns";
 
 import firebase from "./base";
 import { AuthContext } from "./auth";
@@ -21,6 +21,8 @@ function Booking() {
   const history = useHistory();
   const { currentUser } = useContext(AuthContext);
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [submissionError, setSubmissionError] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
   const userId = currentUser?.uid;
 
   const handleDateChange = (date) => {
@@ -31,50 +33,63 @@ function Booking() {
     e.preventDefault();
     const bookingsRef = firebase.database().ref("Bookings");
     const bookingInfo = {
+      userId,
       // toISOString stores in UTC and should be correctable when parsing for local timezone
       start: selectedDate.toISOString(),
       end: addMinutes(selectedDate, BOOKING_MINUTES_PER_TIMESLOT).toISOString(),
-      userId,
     };
 
-    bookingsRef.push(bookingInfo);
+    setSubmissionError(null);
+    setLoading(true);
 
-    alert("Thank you");
-    history.push("/");
+    bookingsRef
+      .push(bookingInfo)
+      .then(() => {
+        alert("Thank you");
+        history.push("/");
+      })
+      .catch((error) => {
+        setLoading(false);
+        setSubmissionError(error);
+      });
   };
 
   return (
     <>
-      <div>{format(selectedDate, "'Today is a' iiii")}</div>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <Grid container justify="space-around">
-          <KeyboardDatePicker
-            margin="normal"
-            id="date-picker-dialog"
-            label="Select a date"
-            format="MM/dd/yyyy"
-            value={selectedDate}
-            onChange={handleDateChange}
-            KeyboardButtonProps={{
-              "aria-label": "change date",
-            }}
-          />
-          <KeyboardTimePicker
-            minutesStep={15}
-            margin="normal"
-            id="time-picker"
-            label="Select a time"
-            value={selectedDate}
-            onChange={handleDateChange}
-            KeyboardButtonProps={{
-              "aria-label": "change time",
-            }}
-          />
-        </Grid>
-        <button type="submit" onClick={handleSubmit}>
-          Book Gym
-        </button>
-      </MuiPickersUtilsProvider>
+      {loading ? (
+        "Loading..."
+      ) : (
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <Grid container justify="space-around">
+            <KeyboardDatePicker
+              margin="normal"
+              id="date-picker-dialog"
+              label="Select a date"
+              format="MM/dd/yyyy"
+              value={selectedDate}
+              onChange={handleDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change date",
+              }}
+            />
+            <KeyboardTimePicker
+              minutesStep={15}
+              margin="normal"
+              id="time-picker"
+              label="Select a time"
+              value={selectedDate}
+              onChange={handleDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change time",
+              }}
+            />
+          </Grid>
+          <button type="submit" onClick={handleSubmit}>
+            Book Gym
+          </button>
+        </MuiPickersUtilsProvider>
+      )}
+      {submissionError ? <div>Could not save booking</div> : null}
       <BookingCalendar />
     </>
   );
