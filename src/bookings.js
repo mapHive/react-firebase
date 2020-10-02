@@ -13,12 +13,13 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import BookingCalendar from "./booking-calendar";
+import BookingsCalendar from "./booking-calendar/index.js";
 
 function Booking() {
   const history = useHistory();
   const { currentUser } = useContext(AuthContext);
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const userId = currentUser?.uid;
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -26,12 +27,16 @@ function Booking() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const bookingRef = firebase.database().ref("Booking");
+    const bookingRef = firebase
+      .database()
+      .ref("UserData")
+      .child(userId)
+      .child("Booking");
     // const bookingISO = selectedDate.toISOString(); This outputs an incorrect time for some reason.
     const booking = selectedDate.toString();
     const bookingInfo = {
       booking,
-      user: { email: currentUser.email, uid: currentUser.uid },
+      userId: { uid: currentUser.uid },
     };
 
     bookingRef.push(bookingInfo);
@@ -72,7 +77,7 @@ function Booking() {
           Book Gym
         </button>
       </MuiPickersUtilsProvider>
-      <BookingCalendar />
+      <BookingsCalendar />
     </>
   );
 }
