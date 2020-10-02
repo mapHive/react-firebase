@@ -1,6 +1,5 @@
 import "date-fns";
 import React, { useContext } from "react";
-import { useHistory } from "react-router";
 import Grid from "@material-ui/core/Grid";
 import {
   MuiPickersUtilsProvider,
@@ -18,44 +17,59 @@ import BookingCalendar from "./booking-calendar/index";
 // When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 
 function Booking() {
-  const history = useHistory();
   const { currentUser } = useContext(AuthContext);
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [submissionError, setSubmissionError] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [currentBookings, setCurrentBookings] = React.useState({});
   const userId = currentUser?.uid;
 
-  const handleDateChange = (date) => {
+  const handleDateChange = React.useCallback((date) => {
     setSelectedDate(date);
-  };
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const bookingsRef = firebase.database().ref("Bookings");
-    const bookingInfo = {
-      userId,
-      // toISOString stores in UTC and should be correctable when parsing for local timezone
-      start: selectedDate.toISOString(),
-      end: addMinutes(selectedDate, BOOKING_MINUTES_PER_TIMESLOT).toISOString(),
+  const handleSubmit = React.useCallback(
+    (e) => {
+      e.preventDefault();
+      const bookingsRef = firebase.database().ref("Bookings");
+      const bookingInfo = {
+        userId,
+        // toISOString stores in UTC and should be correctable when parsing for local timezone
+        start: selectedDate.toISOString(),
+        end: addMinutes(
+          selectedDate,
+          BOOKING_MINUTES_PER_TIMESLOT
+        ).toISOString(),
+      };
+
+      setSubmissionError(null);
+      setLoading(true);
+
+      bookingsRef
+        .push(bookingInfo)
+        .catch(setSubmissionError)
+        .finally(() => setLoading(false));
+    },
+    [selectedDate, userId]
+  );
+
+  React.useEffect(() => {
+    const dataRef = firebase.database().ref("Bookings");
+
+    const handleValue = (snapshot) => {
+      setCurrentBookings(snapshot.val());
     };
 
-    setSubmissionError(null);
-    setLoading(true);
+    dataRef.on("value", handleValue);
 
-    bookingsRef
-      .push(bookingInfo)
-      .then(() => {
-        alert("Thank you");
-        history.push("/");
-      })
-      .catch((error) => {
-        setLoading(false);
-        setSubmissionError(error);
-      });
-  };
+    return () => {
+      dataRef.off("value", handleValue);
+    };
+  }, []);
 
   return (
     <>
+      <h2>Create Booking</h2>
       {loading ? (
         "Loading..."
       ) : (
@@ -90,6 +104,16 @@ function Booking() {
         </MuiPickersUtilsProvider>
       )}
       {submissionError ? <div>Could not save booking</div> : null}
+      <h2>Current Bookings</h2>
+      <ul>
+        {Object.entries(currentBookings).map(([id, booking]) =>
+          booking.userId === userId ? (
+            <div key={id}>
+              {booking.start} - {booking.end}
+            </div>
+          ) : null
+        )}
+      </ul>
       <BookingCalendar />
     </>
   );
