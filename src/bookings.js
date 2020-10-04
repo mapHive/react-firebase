@@ -1,83 +1,120 @@
 import "date-fns";
 import React, { useContext } from "react";
-import { useHistory } from "react-router";
 import Grid from "@material-ui/core/Grid";
-import DateFnsUtils from "@date-io/date-fns";
-import { AuthContext } from "./auth";
-import firebase from "./base";
-import { format } from "date-fns";
-
-// When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
   KeyboardDatePicker,
 } from "@material-ui/pickers";
-import BookingsCalendar from "./booking-calendar/index.js";
+import DateFnsUtils from "@date-io/date-fns";
+import { addMinutes } from "date-fns";
+
+import firebase from "./base";
+import { AuthContext } from "./auth";
+import { BOOKING_MINUTES_PER_TIMESLOT } from "./constants";
+import BookingCalendar from "./booking-calendar/index";
+
+// When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 
 function Booking() {
-  const history = useHistory();
   const { currentUser } = useContext(AuthContext);
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [submissionError, setSubmissionError] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  const [currentBookings, setCurrentBookings] = React.useState({});
   const userId = currentUser?.uid;
 
-  const handleDateChange = (date) => {
+  const handleDateChange = React.useCallback((date) => {
     setSelectedDate(date);
-  };
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const bookingRef = firebase
-      .database()
-      .ref("UserData")
-      .child(userId)
-      .child("Booking");
-    // const bookingISO = selectedDate.toISOString(); This outputs an incorrect time for some reason.
-    const booking = selectedDate.toString();
-    const bookingInfo = {
-      booking,
-      userId: { uid: currentUser.uid },
+  const handleSubmit = React.useCallback(
+    (e) => {
+      e.preventDefault();
+      const bookingsRef = firebase.database().ref("Bookings");
+      const bookingInfo = {
+        userId,
+        // toISOString stores in UTC and should be correctable when parsing for local timezone
+        start: selectedDate.toISOString(),
+        end: addMinutes(
+          selectedDate,
+          BOOKING_MINUTES_PER_TIMESLOT
+        ).toISOString(),
+      };
+
+      setSubmissionError(null);
+      setLoading(true);
+
+      bookingsRef
+        .push(bookingInfo)
+        .catch(setSubmissionError)
+        .finally(() => setLoading(false));
+    },
+    [selectedDate, userId]
+  );
+
+  React.useEffect(() => {
+    const dataRef = firebase.database().ref("Bookings");
+
+    const handleValue = (snapshot) => {
+      setCurrentBookings(snapshot.val());
     };
 
-    bookingRef.push(bookingInfo);
+    dataRef.on("value", handleValue);
 
-    alert("Thank you");
-    history.push("/");
-  };
+    return () => {
+      dataRef.off("value", handleValue);
+    };
+  }, []);
 
   return (
     <>
-      <div>{format(selectedDate, "'Today is a' iiii")}</div>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <Grid container justify="space-around">
-          <KeyboardDatePicker
-            margin="normal"
-            id="date-picker-dialog"
-            label="Select a date"
-            format="MM/dd/yyyy"
-            value={selectedDate}
-            onChange={handleDateChange}
-            KeyboardButtonProps={{
-              "aria-label": "change date",
-            }}
-          />
-          <KeyboardTimePicker
-            minutesStep={15}
-            margin="normal"
-            id="time-picker"
-            label="Select a time"
-            value={selectedDate}
-            onChange={handleDateChange}
-            KeyboardButtonProps={{
-              "aria-label": "change time",
-            }}
-          />
-        </Grid>
-        <button type="submit" onClick={handleSubmit}>
-          Book Gym
-        </button>
-      </MuiPickersUtilsProvider>
-      <BookingsCalendar />
+      <h2>Create Booking</h2>
+      {loading ? (
+        "Loading..."
+      ) : (
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <Grid container justify="space-around">
+            <KeyboardDatePicker
+              margin="normal"
+              id="date-picker-dialog"
+              label="Select a date"
+              format="MM/dd/yyyy"
+              value={selectedDate}
+              onChange={handleDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change date",
+              }}
+            />
+            <KeyboardTimePicker
+              minutesStep={15}
+              margin="normal"
+              id="time-picker"
+              label="Select a time"
+              value={selectedDate}
+              onChange={handleDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change time",
+              }}
+            />
+          </Grid>
+          <button type="submit" onClick={handleSubmit}>
+            Book Gym
+          </button>
+        </MuiPickersUtilsProvider>
+      )}
+      {submissionError ? <div>Could not save booking</div> : null}
+      <h2>Current Bookings</h2>
+      <ul>
+        {Object.entries(currentBookings).map(([id, booking]) =>
+          booking.userId === userId ? (
+            <div key={id}>
+              {booking.start} - {booking.end}
+            </div>
+          ) : null
+        )}
+      </ul>
+      <BookingCalendar />
     </>
   );
 }
