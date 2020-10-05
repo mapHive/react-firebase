@@ -8,7 +8,7 @@ import PrivateRoute from "./privateRoute";
 import Nav from "./components/nav";
 import CovidCheckRegister from "./covid-check-register";
 import CovidCheckEntries from "./covid-check-entries";
-import Bookings from "./bookings";
+import BookingsScreen from "./bookings/bookings-screen";
 import "./app.css";
 
 const App = () => {
@@ -29,7 +29,7 @@ const App = () => {
               path="/covid-check/entries"
               component={CovidCheckEntries}
             />
-            <PrivateRoute exact path="/bookings" component={Bookings} />
+            <PrivateRoute exact path="/bookings" component={BookingsScreen} />
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={SignUp} />
           </div>

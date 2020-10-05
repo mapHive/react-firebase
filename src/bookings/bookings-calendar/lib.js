@@ -7,18 +7,24 @@ import {
   isSameMonth,
   isSameYear,
   isWithinInterval,
+  parseISO,
 } from "date-fns";
 
 const MINUTES_IN_DAY = 24 * 60;
 
-const generateTimeslotsForDate = (
+export const dateToStoredDate = (date) => date.toISOString();
+
+export const storedDateToDate = (isoString) => parseISO(isoString);
+
+const generateTimeslotsForDate = ({
   date,
   minutesPerTimeslot,
   minTime,
-  maxTime
-) => {
+  maxTime,
+  currentDate,
+}) => {
   const dayStart = startOfDay(date);
-  const now = new Date();
+  const now = currentDate || new Date();
   const numTimeslots = Math.floor(MINUTES_IN_DAY / minutesPerTimeslot);
 
   // Replace this is for loop if easier to understand
@@ -32,14 +38,15 @@ const generateTimeslotsForDate = (
   });
 };
 
-export const generateDatesAndTimeSlots = (
+export const generateDatesAndTimeSlots = ({
   fromDate,
   numDays,
   minutesPerTimeslot,
   minTime,
-  maxTime
-) => {
-  const today = new Date();
+  maxTime,
+  currentDate,
+}) => {
+  const now = currentDate || Date.now();
 
   // Generate an array of dates that we want to render
   return Array.from({ length: numDays }, (val, index) => {
@@ -47,13 +54,14 @@ export const generateDatesAndTimeSlots = (
 
     return {
       date,
-      isToday: isSameDay(today, date),
-      timeslots: generateTimeslotsForDate(
+      isToday: isSameDay(now, date),
+      timeslots: generateTimeslotsForDate({
         date,
         minutesPerTimeslot,
         minTime,
-        maxTime
-      ),
+        maxTime,
+        currentDate: now,
+      }),
     };
   });
 };
