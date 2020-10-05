@@ -44,16 +44,3 @@
 .date__title__date {
   font-weight: bold;
 }
-
-.date__timeslot {
-  padding: var(--gap);
-  border-bottom: var(--border);
-}
-
-.date__timeslot:last-of-type {
-  border-bottom: none;
-}
-
-.date__timeslot--current {
-  border: 1px solid var(--highlight-color);
-}

@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  padding: var(--gap);
+  border: 1px solid transparent;
+  border-bottom-color: var(--border-color);
+}
+
+.current {
+  border-color: var(--highlight-color);
+}
+
+.past {
+  border-bottom-color: transparent;
+}
+
+.isBooked {
+  background-color: red;
+  color: white;
+}

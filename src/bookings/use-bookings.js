@@ -1,12 +1,13 @@
 import { useContext, useCallback, useMemo, useEffect, useState } from "react";
+import { addDays, endOfDay, startOfDay } from "date-fns";
 
 import app from "../base";
 import { AuthContext } from "../auth";
-import { dateToStoredDate, storedDateToDate } from "./lib";
+import { dateToStoredDate, parseBookingData } from "./bookings-calendar/lib";
 
 // When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 
-const useBookings = () => {
+const useBookings = ({ from, numDays }) => {
   const { currentUser } = useContext(AuthContext);
   const [submissionError, setSubmissionError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,17 @@ const useBookings = () => {
 
   const userId = currentUser?.uid;
 
-  const dataRef = useMemo(() => app.database().ref("Bookings"), []);
+  const dataRef = useMemo(() => {
+    const startDateTime = startOfDay(from);
+    const endDateTime = endOfDay(addDays(startDateTime, numDays));
+
+    return app
+      .database()
+      .ref("Bookings")
+      .orderByChild("start")
+      .startAt(dateToStoredDate(startDateTime))
+      .endAt(dateToStoredDate(endDateTime));
+  }, [from, numDays]);
 
   const submitBooking = useCallback(
     (start, end) => {
@@ -42,16 +53,7 @@ const useBookings = () => {
     if (!userId) return;
 
     const handleValue = (snapshot) => {
-      setBookings(
-        Object.entries(snapshot.val()).reduce((acc, [id, booking]) => {
-          acc[id] = {
-            start: storedDateToDate(booking.start),
-            end: storedDateToDate(booking.end),
-            isUserBooking: userId === booking.userId,
-          };
-          return acc;
-        }, {})
-      );
+      setBookings(parseBookingData(snapshot.val() || {}, { userId }));
       setLoading(false);
     };
 

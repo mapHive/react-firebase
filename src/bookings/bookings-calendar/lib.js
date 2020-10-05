@@ -1,20 +1,25 @@
 import {
   format,
+  set,
   startOfDay,
   addMinutes,
   addDays,
   isSameDay,
   isSameMonth,
+  isSameMinute,
   isSameYear,
+  isBefore,
   isWithinInterval,
+  differenceInMinutes,
   parseISO,
 } from "date-fns";
-
-const MINUTES_IN_DAY = 24 * 60;
 
 export const dateToStoredDate = (date) => date.toISOString();
 
 export const storedDateToDate = (isoString) => parseISO(isoString);
+
+const parseHoursMinutes = (hoursMinutesString) =>
+  hoursMinutesString.split(":").map(Number);
 
 const generateTimeslotsForDate = ({
   date,
@@ -22,19 +27,34 @@ const generateTimeslotsForDate = ({
   minTime,
   maxTime,
   currentDate,
+  bookings,
 }) => {
-  const dayStart = startOfDay(date);
+  const [startHours, startMinutes] = parseHoursMinutes(minTime);
+  const [endHours, endMinutes] = parseHoursMinutes(maxTime);
   const now = currentDate || new Date();
-  const numTimeslots = Math.floor(MINUTES_IN_DAY / minutesPerTimeslot);
+  const dayStart = set(startOfDay(date), {
+    hours: startHours,
+    minutes: startMinutes,
+  });
+  const dayEnd = set(startOfDay(date), {
+    hours: endHours,
+    minutes: endMinutes,
+  });
+  const numTimeslots = Math.floor(
+    differenceInMinutes(dayEnd, dayStart) / minutesPerTimeslot
+  );
 
-  // Replace this is for loop if easier to understand
-  // use datefns to figure out max and min timeslots as boundaries, generate between
   return Array.from({ length: numTimeslots }, (val, index) => {
     const start = addMinutes(dayStart, index * minutesPerTimeslot);
     const end = addMinutes(start, minutesPerTimeslot);
     const isCurrent = isWithinInterval(now, { start, end });
+    const isPast = isBefore(end, now);
+    const timeSlotBookings =
+      bookings?.filter(
+        (b) => isSameMinute(start, b.start) && isSameMinute(end, b.end)
+      ) ?? [];
 
-    return { start, end, isCurrent };
+    return { start, end, isCurrent, isPast, bookings: timeSlotBookings };
   });
 };
 
@@ -44,6 +64,7 @@ export const generateDatesAndTimeSlots = ({
   minutesPerTimeslot,
   minTime,
   maxTime,
+  bookings,
   currentDate,
 }) => {
   const now = currentDate || Date.now();
@@ -60,6 +81,7 @@ export const generateDatesAndTimeSlots = ({
         minutesPerTimeslot,
         minTime,
         maxTime,
+        bookings,
         currentDate: now,
       }),
     };
@@ -80,3 +102,15 @@ export const getTimespanTitle = (startDate, endDate) => {
 
   return `${format(startDate, "MMMM yyyy")} - ${format(endDate, "MMMM yyyy")}`;
 };
+
+export const parseBookingData = (data, { userId }) =>
+  Object.entries(data).reduce((acc, [id, booking]) => {
+    acc.push({
+      id,
+      start: storedDateToDate(booking.start),
+      end: storedDateToDate(booking.end),
+      isUserBooking: userId === booking.userId,
+    });
+
+    return acc;
+  }, []);
