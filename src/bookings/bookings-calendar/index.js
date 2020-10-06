@@ -12,7 +12,7 @@ import styles from "./bookings-calendar.module.css";
 const cx = classnames.bind(styles);
 
 const BookingsCalendar = () => {
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
   const bookingConfig = useBookingConfig();
   const bookings = useBookings({ from: now, numDays: BOOKINGS_CALENDAR_DAYS });
 
