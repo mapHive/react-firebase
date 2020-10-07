@@ -1,19 +1,29 @@
 import React, { useMemo, memo, useCallback } from "react";
-import { format, set, startOfDay } from "date-fns";
+import { Temporal } from "proposal-temporal";
 import classnames from "classnames/bind";
 
+import {
+  formatTemporal,
+  getCurrentDateTimeInTimezone,
+} from "../../lib/date-time";
 import { BOOKINGS_CALENDAR_DAYS } from "../constants";
 import useBookingConfig from "../use-booking-config";
 import useBookings from "../use-bookings";
-import { generateCalendarData, getTimespanTitle } from "./lib";
+import { generateCalendarData, getTimespanTitle } from "../lib";
 import Timeslot from "./timeslot";
 import styles from "./bookings-calendar.module.css";
 
 const cx = classnames.bind(styles);
 
 const BookingsCalendar = () => {
-  const now = useMemo(() => new Date(), []);
-  const bookingConfig = useBookingConfig();
+  const { config } = useBookingConfig();
+  const { timezone } = config || {};
+
+  const now = useMemo(
+    () => getCurrentDateTimeInTimezone(timezone || "Australia/Melbourne"),
+    [timezone]
+  );
+
   const {
     bookings,
     submitBooking,
@@ -21,35 +31,33 @@ const BookingsCalendar = () => {
     apiStatus,
     apiError,
   } = useBookings({
-    from: now,
+    fromDateTime: now,
     numDays: BOOKINGS_CALENDAR_DAYS,
   });
-
-  const config = bookingConfig.config;
 
   const datesToRender = useMemo(() => {
     if (!config) return null;
 
     return generateCalendarData({
-      fromDate: now,
+      currentDateTime: now,
       numDays: BOOKINGS_CALENDAR_DAYS,
       maxBookingsPerTimeslot: config.maxBookingsPerTimeslot,
       minutesPerTimeslot: config.timeslotDurationMinutes,
-      minTime: config.dayStartTime,
-      maxTime: config.dayEndTime,
+      minTime: Temporal.Time.from(config.dayStartTime),
+      maxTime: Temporal.Time.from(config.dayEndTime),
       bookings: bookings || [],
     });
   }, [now, config, bookings]);
 
   const handleTimeslotClick = useCallback(
     (timeslot) => {
-      if (timeslot.userBooking) {
+      if (timeslot.userBookingId) {
         // eslint-disable-next-line
         const confirmation = confirm(
-          `Remove your ${format(timeslot.start, "p")} booking?`
+          `Remove your ${formatTemporal(timeslot.start, "p")} booking?`
         );
 
-        if (confirmation) removeBooking(timeslot.userBooking.id);
+        if (confirmation) removeBooking(timeslot.userBookingId);
 
         return;
       }
@@ -64,10 +72,10 @@ const BookingsCalendar = () => {
 
       // eslint-disable-next-line
       const confirmation = confirm(
-        `Book gym for ${format(timeslot.start, "p")} to ${format(
-          timeslot.end,
+        `Book gym for ${formatTemporal(
+          timeslot.start,
           "p"
-        )}?`
+        )} to ${formatTemporal(timeslot.end, "p")}?`
       );
 
       if (confirmation) submitBooking(timeslot.start, timeslot.end);
@@ -102,10 +110,10 @@ const BookingsCalendar = () => {
                 >
                   <div className={styles.date__title}>
                     <div className={styles.date__title__day}>
-                      {format(date, "eee")}
+                      {formatTemporal(date, "eee")}
                     </div>
                     <div className={styles.date__title__date}>
-                      {format(date, "d")}
+                      {formatTemporal(date, "d")}
                     </div>
                   </div>
                   <div>

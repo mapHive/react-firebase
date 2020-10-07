@@ -1,13 +1,15 @@
 import { useContext, useCallback, useMemo, useEffect, useState } from "react";
-import { addDays, endOfDay, startOfDay } from "date-fns";
 
 import app from "../base";
 import { AuthContext } from "../auth";
-import { dateToStoredDate, parseBookingData } from "./bookings-calendar/lib";
+import { dateTimeToStoredDate, parseBookingData } from "./lib";
 
 // When storing date (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString) { user: …, date: date.toISOString() }
 
-const useBookings = ({ from, numDays }) => {
+const useBookings = ({
+  fromDateTime, // Temporal.DateTime
+  numDays, // number
+}) => {
   const { currentUser } = useContext(AuthContext);
   const [apiError, setApiError] = useState(null);
   const [apiStatus, setApiStatus] = useState("reading");
@@ -17,25 +19,26 @@ const useBookings = ({ from, numDays }) => {
 
   const dataRef = useMemo(() => app.database().ref("Bookings"), []);
 
-  const timeboxedDataRef = useMemo(() => {
-    const startDateTime = startOfDay(from);
-    const endDateTime = endOfDay(addDays(startDateTime, numDays));
-
-    return dataRef
-      .orderByChild("start")
-      .startAt(dateToStoredDate(startDateTime))
-      .endAt(dateToStoredDate(endDateTime));
-  }, [dataRef, from, numDays]);
+  const timeboxedDataRef = useMemo(
+    () =>
+      dataRef
+        .orderByChild("start")
+        .startAt(dateTimeToStoredDate(fromDateTime))
+        .endAt(dateTimeToStoredDate(fromDateTime.plus({ days: numDays }))),
+    [dataRef, fromDateTime, numDays]
+  );
 
   const submitBooking = useCallback(
-    (start, end) => {
+    (
+      start, // DateTime
+      end // DateTime
+    ) => {
       if (!userId) return;
 
       const bookingInfo = {
         userId,
-        // toISOString stores in UTC and should be correctable when parsing for local timezone
-        start: dateToStoredDate(start),
-        end: dateToStoredDate(end),
+        start: dateTimeToStoredDate(start),
+        end: dateTimeToStoredDate(end),
       };
 
       setApiError(null);
