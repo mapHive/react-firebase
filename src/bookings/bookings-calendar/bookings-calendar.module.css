@@ -1,14 +1,25 @@
 :root {
   --border-color: #eee;
-  --highlight-color: lightskyblue;
+  --highlight-color: dodgerblue;
   --gap: 0.4rem;
   --border: 1px solid var(--border-color);
 }
 
 .container {
-  display: flex;
   width: 100%;
+  padding: 0 0.4rem 2rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.body {
+  display: flex;
+  width: auto;
   font-size: 0.9rem;
+}
+
+.container * {
+  box-sizing: border-box;
 }
 
 .title {
@@ -16,8 +27,22 @@
 }
 
 .date {
-  flex: 1;
+  flex: 1 0;
+  flex-basis: 30vw;
+  min-width: 8vw;
   border-right: var(--border);
+}
+
+@media (min-width: 700px) {
+  .date {
+    flex-basis: 20vw;
+  }
+}
+
+@media (min-width: 1040px) {
+  .date {
+    flex-basis: 10vw;
+  }
 }
 
 .date:last-of-type {
@@ -31,8 +56,9 @@
 }
 
 .date--today .date__title {
-  color: white;
-  background-color: var(--highlight-color);
+  font-weight: bold;
+  color: var(--highlight-color);
+  border-bottom-color: var(--highlight-color);
 }
 
 .date__title__day {
@@ -43,4 +69,51 @@
 
 .date__title__date {
   font-weight: bold;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(30%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.infobox {
+  position: relative;
+  padding: 0.8rem 0.8rem 0.8rem 2.4rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  animation: rise 400ms ease-out forwards;
+  border: 1px solid transparent;
+}
+
+.infobox::before {
+  display: block;
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.infobox.status {
+  color: deepskyblue;
+  border-color: skyblue;
+}
+
+.infobox.status::before {
+  content: "ℹ";
+}
+
+.infobox.error {
+  color: crimson;
+  border-color: orangered;
+}
+
+.infobox.error::before {
+  content: "⚠️";
 }

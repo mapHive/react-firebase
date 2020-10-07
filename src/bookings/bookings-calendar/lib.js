@@ -24,6 +24,7 @@ const parseHoursMinutes = (hoursMinutesString) =>
 const generateTimeslotsForDate = ({
   date,
   minutesPerTimeslot,
+  maxBookingsPerTimeslot,
   minTime,
   maxTime,
   currentDate,
@@ -49,19 +50,28 @@ const generateTimeslotsForDate = ({
     const end = addMinutes(start, minutesPerTimeslot);
     const isCurrent = isWithinInterval(now, { start, end });
     const isPast = isBefore(end, now);
-    const timeSlotBookings =
+    const timeslotBookings =
       bookings?.filter(
-        (b) => isSameMinute(start, b.start) && isSameMinute(end, b.end)
+        (booking) =>
+          isSameMinute(start, booking.start) && isSameMinute(end, booking.end)
       ) ?? [];
 
-    return { start, end, isCurrent, isPast, bookings: timeSlotBookings };
+    return {
+      start,
+      end,
+      isCurrent,
+      isPast,
+      isFull: timeslotBookings.length >= maxBookingsPerTimeslot,
+      userBooking: timeslotBookings.find((booking) => booking.isUserBooking),
+    };
   });
 };
 
-export const generateDatesAndTimeSlots = ({
+export const generateCalendarData = ({
   fromDate,
   numDays,
   minutesPerTimeslot,
+  maxBookingsPerTimeslot,
   minTime,
   maxTime,
   bookings,
@@ -79,6 +89,7 @@ export const generateDatesAndTimeSlots = ({
       timeslots: generateTimeslotsForDate({
         date,
         minutesPerTimeslot,
+        maxBookingsPerTimeslot,
         minTime,
         maxTime,
         bookings,

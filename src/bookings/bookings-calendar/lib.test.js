@@ -1,4 +1,4 @@
-import { getTimespanTitle, generateDatesAndTimeSlots } from "./lib";
+import { getTimespanTitle, generateCalendarData } from "./lib";
 
 describe("booking-calendar/lib", () => {
   describe("getTimespanTitle", () => {
@@ -24,21 +24,35 @@ describe("booking-calendar/lib", () => {
     });
   });
 
-  describe("generateDatesAndTimeSlots", () => {
+  describe("generateCalendarData", () => {
     it("generates calendar dates and timeslots", () => {
       expect(
-        generateDatesAndTimeSlots({
+        generateCalendarData({
           fromDate: new Date(2020, 10, 10),
           numDays: 2,
           minutesPerTimeslot: 60,
+          maxBookingsPerTimeslot: 2,
           minTime: "06:00",
           maxTime: "10:00",
           currentDate: new Date(2020, 10, 10, 8, 30),
           bookings: [
             {
+              id: "booking1",
               start: new Date(2020, 10, 10, 9, 0),
               end: new Date(2020, 10, 10, 10, 0),
               isUserBooking: false,
+            },
+            {
+              id: "booking2",
+              start: new Date(2020, 10, 10, 9, 0),
+              end: new Date(2020, 10, 10, 10, 0),
+              isUserBooking: true,
+            },
+            {
+              id: "booking3",
+              start: new Date(2020, 10, 11, 9, 0),
+              end: new Date(2020, 10, 11, 10, 0),
+              isUserBooking: true,
             },
           ],
         })
@@ -50,36 +64,39 @@ describe("booking-calendar/lib", () => {
             {
               start: new Date(2020, 10, 10, 6, 0),
               end: new Date(2020, 10, 10, 7, 0),
-              bookings: [],
               isCurrent: false,
               isPast: true,
+              isFull: false,
+              userBooking: undefined,
             },
             {
               start: new Date(2020, 10, 10, 7, 0),
               end: new Date(2020, 10, 10, 8, 0),
-              bookings: [],
               isCurrent: false,
               isPast: true,
+              isFull: false,
+              userBooking: undefined,
             },
             {
               start: new Date(2020, 10, 10, 8, 0),
               end: new Date(2020, 10, 10, 9, 0),
-              bookings: [],
               isCurrent: true,
               isPast: false,
+              isFull: false,
+              userBooking: undefined,
             },
             {
               start: new Date(2020, 10, 10, 9, 0),
               end: new Date(2020, 10, 10, 10, 0),
-              bookings: [
-                {
-                  start: new Date(2020, 10, 10, 9, 0),
-                  end: new Date(2020, 10, 10, 10, 0),
-                  isUserBooking: false,
-                },
-              ],
               isCurrent: false,
               isPast: false,
+              isFull: true,
+              userBooking: {
+                id: "booking2",
+                start: new Date(2020, 10, 10, 9, 0),
+                end: new Date(2020, 10, 10, 10, 0),
+                isUserBooking: true,
+              },
             },
           ],
         },
@@ -91,29 +108,38 @@ describe("booking-calendar/lib", () => {
               start: new Date(2020, 10, 11, 6, 0),
               end: new Date(2020, 10, 11, 7, 0),
               isCurrent: false,
-              bookings: [],
               isPast: false,
+              isFull: false,
+              userBooking: undefined,
             },
             {
               start: new Date(2020, 10, 11, 7, 0),
               end: new Date(2020, 10, 11, 8, 0),
               isCurrent: false,
-              bookings: [],
               isPast: false,
+              isFull: false,
+              userBooking: undefined,
             },
             {
               start: new Date(2020, 10, 11, 8, 0),
               end: new Date(2020, 10, 11, 9, 0),
               isCurrent: false,
-              bookings: [],
               isPast: false,
+              isFull: false,
+              userBooking: undefined,
             },
             {
               start: new Date(2020, 10, 11, 9, 0),
               end: new Date(2020, 10, 11, 10, 0),
               isCurrent: false,
-              bookings: [],
               isPast: false,
+              isFull: false,
+              userBooking: {
+                id: "booking3",
+                start: new Date(2020, 10, 11, 9, 0),
+                end: new Date(2020, 10, 11, 10, 0),
+                isUserBooking: true,
+              },
             },
           ],
         },

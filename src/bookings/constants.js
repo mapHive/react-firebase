@@ -1,1 +1,1 @@
-export const BOOKINGS_CALENDAR_DAYS = 7;
+export const BOOKINGS_CALENDAR_DAYS = 14;

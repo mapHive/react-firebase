@@ -9,23 +9,23 @@ import { dateToStoredDate, parseBookingData } from "./bookings-calendar/lib";
 
 const useBookings = ({ from, numDays }) => {
   const { currentUser } = useContext(AuthContext);
-  const [submissionError, setSubmissionError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
+  const [apiStatus, setApiStatus] = useState("reading");
   const [bookings, setBookings] = useState();
 
   const userId = currentUser?.uid;
 
-  const dataRef = useMemo(() => {
+  const dataRef = useMemo(() => app.database().ref("Bookings"), []);
+
+  const timeboxedDataRef = useMemo(() => {
     const startDateTime = startOfDay(from);
     const endDateTime = endOfDay(addDays(startDateTime, numDays));
 
-    return app
-      .database()
-      .ref("Bookings")
+    return dataRef
       .orderByChild("start")
       .startAt(dateToStoredDate(startDateTime))
       .endAt(dateToStoredDate(endDateTime));
-  }, [from, numDays]);
+  }, [dataRef, from, numDays]);
 
   const submitBooking = useCallback(
     (start, end) => {
@@ -38,15 +38,29 @@ const useBookings = ({ from, numDays }) => {
         end: dateToStoredDate(end),
       };
 
-      setSubmissionError(null);
-      setLoading(true);
+      setApiError(null);
+      setApiStatus("submitting");
 
-      dataRef
-        .push(bookingInfo)
-        .catch(setSubmissionError)
-        .finally(() => setLoading(false));
+      dataRef.push(bookingInfo).catch((err) => {
+        setApiError(new Error(`SUBMIT_BOOKING: ${err.message}`));
+      });
     },
     [userId, dataRef]
+  );
+
+  const removeBooking = useCallback(
+    (bookingId) => {
+      setApiError(null);
+      setApiStatus("removing");
+
+      dataRef
+        .child(bookingId)
+        .remove()
+        .catch((err) => {
+          setApiError(new Error(`REMOVE_BOOKING: ${err.message}`));
+        });
+    },
+    [dataRef]
   );
 
   useEffect(() => {
@@ -54,17 +68,23 @@ const useBookings = ({ from, numDays }) => {
 
     const handleValue = (snapshot) => {
       setBookings(parseBookingData(snapshot.val() || {}, { userId }));
-      setLoading(false);
+      setApiStatus("idle");
     };
 
-    dataRef.on("value", handleValue);
+    timeboxedDataRef.on("value", handleValue);
 
     return () => {
-      dataRef.off("value", handleValue);
+      timeboxedDataRef.off("value", handleValue);
     };
-  }, [dataRef, userId]);
+  }, [userId, timeboxedDataRef]);
 
-  return { bookings, submitBooking, submissionError, loading };
+  return {
+    bookings,
+    submitBooking,
+    removeBooking,
+    apiError,
+    apiStatus,
+  };
 };
 
 export default useBookings;
